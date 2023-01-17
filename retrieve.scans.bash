@@ -2,7 +2,7 @@
 #
 # Goal: Extract all the scan done in the SSC and generate
 #       a csv file with all the available informations"
-# requires : fq installed
+# requires : jq installed
 
 ############################################################
 # Help                                                     #
