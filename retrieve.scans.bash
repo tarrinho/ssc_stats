@@ -14,6 +14,10 @@ Help()
    echo "a csv file with all the available informations"
    echo
    echo "Don't forget to add a Environment Variable : FORTIFY_TOKEN"
+   echo "Token generated in Administration + Token Management from SSC"
+   echo
+   echo "Don't forget to add a Environment Variable : FORTIFY_URL"
+   echo "URL for the SSC instance"
    echo
    echo "Syntax:  [h|filename.csv]"
    echo "options:"
@@ -47,9 +51,15 @@ fi
 declare -a number_scans
 declare -a i=1;
 declare -a fortify_token=$FORTIFY_TOKEN
+declare -a fortify_url=$FORTIFY_URL
 
 if [ -z "$fortify_token" ]; then
  echo "No FORTIFY_TOKEN environment variable provided, try -h"
+ exit;
+fi
+
+if [ -z "$fortify_url" ]; then
+ echo "No FORTIFY_URL environment variable provided, try -h"
  exit;
 fi
 echo "id, guid, uploadDate, type, certification, hostname, engineVersion, artifactId, noOfFiles, totalLOC, execLOC, elapsedTime, fortifyAnnotationsLOC, buildId" > $filename
@@ -58,7 +68,7 @@ while true
 do
  ((i=i+1))
 
- number_scans=`curl -X GET "https://fortify.cfappsecurity.com:443/api/v1/scans/$i" -H  "accept: application/json" -H  "Authorization: FortifyToken $FORTIFY_TOKEN" > temp.file 2> /dev/null `
+ number_scans=`curl -X GET "https://$fortify_url:443/api/v1/scans/$i" -H  "accept: application/json" -H  "Authorization: FortifyToken $fortify_token" > temp.file 2> /dev/null `
  id=`cat temp.file | jq -r '.data.id'`
  guid=`cat temp.file | jq -r '.data.guid'`
  uploadDate=`cat temp.file | jq -r '.data.uploadDate'`
