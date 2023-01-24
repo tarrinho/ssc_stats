@@ -50,6 +50,7 @@ fi
 
 declare -a number_scans
 declare -a i=1;
+declare -a nulls=1;
 declare -a fortify_token=$FORTIFY_TOKEN
 declare -a fortify_url=$FORTIFY_URL
 
@@ -68,27 +69,32 @@ while true
 do
  ((i=i+1))
 
- number_scans=`curl -X GET "https://$fortify_url:443/api/v1/scans/$i" -H  "accept: application/json" -H  "Authorization: FortifyToken $fortify_token" > temp.file 2> /dev/null `
- id=`cat temp.file | jq -r '.data.id'`
- guid=`cat temp.file | jq -r '.data.guid'`
- uploadDate=`cat temp.file | jq -r '.data.uploadDate'`
- itype=`cat temp.file | jq -r '.data.itype'`
- certification=`cat temp.file | jq -r '.data.certification'`
- hostname=`cat temp.file | jq -r '.data.hostname'`
- engineVersion=`cat temp.file | jq -r '.data.Version'`
- artifactId=`cat temp.file | jq -r '.data.artifactId'`
- noOfFiles=`cat temp.file | jq -r '.data.noOfFiles'`
- totalLOC=`cat temp.file | jq -r '.data.totalLOC'`
- execLOC=`cat temp.file | jq -r '.data.execLOC'`
- elapsedTime=`cat temp.file | jq -r '.data.elapsedTime'`
- fortifyAnnotationsLOC=`cat temp.file | jq -r '.data.fortifyAnnotationsLOC'`
- buildId=`cat temp.file | jq -r '.data.buildId'`
+ #number_scans=`curl -X GET "https://$fortify_url:443/api/v1/scans/$i" -H  "accept: application/json" -H  "Authorization: FortifyToken $fortify_token" -o temp.file 2> /dev/null `
+ scan=`curl -X GET "https://$fortify_url:443/api/v1/scans/$i" -H  "accept: application/json" -H  "Authorization: FortifyToken $fortify_token" 2> /dev/null `
+ #echo $scan
+ id=`echo $scan | jq -r '.data.id'`
+ guid=`echo $scan | jq -r '.data.guid'`
+ uploadDate=`echo $scan | jq -r '.data.uploadDate'`
+ type=`echo $scan | jq -r '.data.type'`
+ certification=`echo $scan | jq -r '.data.certification'`
+ hostname=`echo $scan | jq -r '.data.hostname'`
+ engineVersion=`echo $scan | jq -r '.data.engineVersion'`
+ artifactId=`echo $scan | jq -r '.data.artifactId'`
+ noOfFiles=`echo $scan | jq -r '.data.noOfFiles'`
+ totalLOC=`echo $scan | jq -r '.data.totalLOC'`
+ execLOC=`echo $scan | jq -r '.data.execLOC'`
+ elapsedTime=`echo $scan | jq -r '.data.elapsedTime'`
+ fortifyAnnotationsLOC=`echo $scan | jq -r '.data.fortifyAnnotationsLOC'`
+ buildId=`echo $scan | jq -r '.data.buildId'`
  if [ "$id" = null ]; then
-	 break;
+	 ((nulls=$nulls+1))
  fi
+ if [ "$nulls" -gt 4 ]; then
+        echo $nulls
+	break
+ fi
+	
  #echo "$id, $guid, $uploadDate, $type, $certification, $hostname, $engineVersion, $artifactId, $noOfFiles, $totalLOC, $execLOC, $elapsedTime, $fortifyAnnotationsLOC, $buildId" 
  echo "$id, $guid, $uploadDate, $type, $certification, $hostname, $engineVersion, $artifactId, $noOfFiles, $totalLOC, $execLOC, $elapsedTime, $fortifyAnnotationsLOC, $buildId" >> $filename
 done
 
-# clean up
-`rm -f temp.file`
